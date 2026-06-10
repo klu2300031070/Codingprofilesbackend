@@ -20,6 +20,11 @@ public class CodeforcesUserController {
     @Autowired
     private CodeforcesService cs;
   
+    @GetMapping("/")
+    public String getMethodName() {
+        return "Project is working";
+    }
+    
     
     @GetMapping("/codeforces/{handle}")
     public ResponseEntity<Map<String, Object>> getCodeforceData(@PathVariable String handle) {

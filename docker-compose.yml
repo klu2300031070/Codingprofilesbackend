@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  # Service 1: The Redis Cache Container
+  my-redis:
+    image: redis:7-alpine
+    container_name: local-redis-container
+    ports:
+      - "6379:6379"
+    restart: always
+
+  # Service 2: Your Multi-Stage Spring Boot Container
+  spring-app:
+    build: .
+    container_name: local-spring-app
+    ports:
+      - "2004:2004"
+    depends_on:
+      - my-redis
+    environment:
+      # Maps your properties file placeholder to the Redis service name above
+      - redishost=my-redis
