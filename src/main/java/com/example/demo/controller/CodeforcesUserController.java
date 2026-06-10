@@ -8,6 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClient;
 import com.example.demo.service.CodeforcesService;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 public class CodeforcesUserController {
@@ -28,4 +31,10 @@ public class CodeforcesUserController {
         
         return ResponseEntity.ok(data);
     }
+    @GetMapping("/codeforces/{handle}/gettopics")
+    public ResponseEntity<Map<String, Integer>> getMethodName(@PathVariable String handle ) {
+    	
+        return ResponseEntity.ok(cs.calculateTopicPerformance(handle));
+    }
+    
 }
