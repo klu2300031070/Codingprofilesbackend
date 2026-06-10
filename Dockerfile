@@ -1,20 +1,16 @@
-# Stage 1: Build the app
-FROM eclipse-temurin:24-jdk AS builder
+FROM maven:3.9.11-eclipse-temurin-21 AS builder
 
 WORKDIR /app
 
-COPY mvnw .          
-COPY .mvn/ .mvn
-COPY pom.xml ./
-COPY src ./src
+COPY pom.xml .
+COPY src src
 
-RUN chmod +x mvnw
-RUN ./mvnw clean package -DskipTests
+RUN mvn clean package -DskipTests
 
-# Stage 2: Run the app
-FROM eclipse-temurin:24-jdk
+FROM eclipse-temurin:21-jre
 
 WORKDIR /app
+
 COPY --from=builder /app/target/*.jar app.jar
 
 EXPOSE 2004
