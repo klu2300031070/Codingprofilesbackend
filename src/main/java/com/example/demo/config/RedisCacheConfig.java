@@ -7,8 +7,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer; // <-- Added Jackson serializer
 import org.springframework.data.redis.serializer.RedisSerializationContext;
-import org.springframework.data.redis.serializer.StringRedisSerializer; // <-- Import String serializer
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.time.Duration;
 
@@ -18,14 +19,14 @@ public class RedisCacheConfig {
 
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
-        // Explicit configuration for handling plain, raw text strings across environments
+        // Updated configuration to serialize structural maps and Java objects into JSON entries
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofDays(1)) // Forces the 24-hour expiration window
                 .disableCachingNullValues()   // Prevents saving faulty/empty responses
                 .serializeKeysWith(RedisSerializationContext.SerializationPair
-                        .fromSerializer(new StringRedisSerializer())) // Clean string keys
+                        .fromSerializer(new StringRedisSerializer())) // Keeps cache keys clean plain text
                 .serializeValuesWith(RedisSerializationContext.SerializationPair
-                        .fromSerializer(new StringRedisSerializer())); // Clean string values (fixes your issue)
+                        .fromSerializer(new GenericJackson2JsonRedisSerializer())); // <-- FIX: Handles your HashMaps seamlessly
 
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(config)
