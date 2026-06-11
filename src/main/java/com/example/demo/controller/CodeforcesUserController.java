@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClient;
+
+import com.example.demo.dto.CodeforcesSubmission;
+import com.example.demo.service.CodeforcesDataGatewayService;
 import com.example.demo.service.CodeforcesService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,6 +22,9 @@ public class CodeforcesUserController {
     
     @Autowired
     private CodeforcesService cs;
+    
+    @Autowired
+    private CodeforcesDataGatewayService cds;
   
     @GetMapping("/")
     public String getMethodName() {
@@ -28,8 +34,8 @@ public class CodeforcesUserController {
     
     @GetMapping("/codeforces/{handle}")
     public ResponseEntity<Map<String, Object>> getCodeforceData(@PathVariable String handle) {
-        Map<String, Object> data = cs.getUserFullProfile(handle);
-        
+    	
+    	Map<String, Object> data=cs.getUserFullProfile(handle);
         if (data.containsKey("profile_error") && data.containsKey("submissions_error")) {
             return ResponseEntity.status(500).body(data);
         }
