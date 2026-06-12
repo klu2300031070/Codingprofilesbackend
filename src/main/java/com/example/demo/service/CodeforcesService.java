@@ -34,11 +34,11 @@ import java.util.HashSet;
 import java.util.List;
 
 import java.util.Map;
+import java.util.Set;
 
 
 
 @Service
-
 public class CodeforcesService {
 	@Autowired
 	private CodeforcesDataGatewayService cds;
@@ -76,15 +76,18 @@ public class CodeforcesService {
     public Map<String, Integer> calculateTopicPerformance(String handle) {
         //System.out.println("⚠️ Cache MISS - Running Topic Analysis Analytics for: " + handle);
         Map<String, Integer> hm = new HashMap<>();
+        Set<String> hs=new HashSet<>();
         List<CodeforcesSubmission> data=cds.getUserFullProfile(handle);
                 if (data != null) {
                     for (CodeforcesSubmission i : data) {
                         // DEFENSIVE FIX: Guard against missing problem blocks or missing tag structures
-                        if (i != null && i.getProblem() != null && i.getProblem().getTags() != null) {
+                        if (i != null && i.getProblem() != null && i.getProblem().getTags() != null&&i.getProblem().getRating()!=null&&i.getVerdict().equals("OK")&&!hs.contains(i.getProblem().getName())) {
+                        	hs.add(i.getProblem().getName());
                             for (String j : i.getProblem().getTags()) {
                                 if (j != null) {
-                                    hm.put(j, hm.getOrDefault(j, 0) + 1);
+                                    hm.put(j, hm.getOrDefault(j, 0) + i.getProblem().getRating());
                                 }
+                                
                             }
                         }
                     }
