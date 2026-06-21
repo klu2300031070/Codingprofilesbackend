@@ -31,9 +31,9 @@ public class RedisCacheConfig {
                 .entryTtl(timeUntilMidnight) // Sets the dynamic expiration to midnight tonight
                 .disableCachingNullValues()   
                 .serializeKeysWith(RedisSerializationContext.SerializationPair
-                        .fromSerializer(new StringRedisSerializer())) 
+                .fromSerializer(new StringRedisSerializer())) 
                 .serializeValuesWith(RedisSerializationContext.SerializationPair
-                        .fromSerializer(new GenericJackson2JsonRedisSerializer())); // Handles Lists seamlessly!
+                .fromSerializer(new GenericJackson2JsonRedisSerializer())); // Handles Lists seamlessly!
 
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(config)

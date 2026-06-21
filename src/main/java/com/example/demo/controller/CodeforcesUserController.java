@@ -2,23 +2,21 @@ package com.example.demo.controller;
 
 
 import java.util.*;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestClient;
-
-import com.example.demo.dto.CodeforcesSubmission;
+import com.example.demo.dto.UserAnalysisReport;
 import com.example.demo.service.CodeforcesDataGatewayService;
 import com.example.demo.service.CodeforcesService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 @RestController
 public class CodeforcesUserController {
 
-    // Initialize Spring 3.x RestClient directly pointing to Codeforces API
+    
     
     @Autowired
     private CodeforcesService cs;
@@ -27,8 +25,8 @@ public class CodeforcesUserController {
     private CodeforcesDataGatewayService cds;
   
     @GetMapping("/")
-    public String getMethodName() {
-        return "Project is working";
+    public String getMethodName(HttpServletRequest hq) {
+        return "Project is working " +hq.getSession().getId();
     }
     
     
@@ -47,5 +45,11 @@ public class CodeforcesUserController {
     	
         return ResponseEntity.ok(cs.calculateTopicPerformance(handle));
     }
+    
+    @GetMapping("/codeforces/{handle}/score")
+    public UserAnalysisReport gettopicscores(@PathVariable String handle) {
+        return cs.generateAdvancedAnalysis(handle);
+    }
+    
     
 }
