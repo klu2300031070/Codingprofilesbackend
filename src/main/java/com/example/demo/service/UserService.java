@@ -1,28 +1,58 @@
 package com.example.demo.service;
 
+import java.security.AuthProvider;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.dto.Users; // 🔥 FIX: Import your own entity, not Spring's User class
+import com.example.demo.dto.Users;
 import com.example.demo.repo.UserRepo;
 
-@Service // 🔥 FIX: Added bean annotation so Spring finds it
-public class UserService implements UserDetailsService {
-    
-    @Autowired
-    private UserRepo ur;
-    
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Users u = ur.findByUsername(username);
-        if (u == null) {
-            System.out.println("User Not Found: " + username);
-            throw new UsernameNotFoundException("User not found: " + username);
-        }
-        // 🔥 FIX: Pass the found database user to the principal wrapper
-        return new UserPrincipal(u);
-    }
+@Service
+public class UserService {
+
+	@Autowired
+	private JwtService jwt;
+	
+	@Autowired
+	public UserRepo ur;
+	
+	@Autowired
+	private AuthenticationManager authmanger;
+	
+	private BCryptPasswordEncoder encoder=new BCryptPasswordEncoder(12);
+	
+	public Users register(Users u) {
+		u.setPassword(encoder.encode( u.getPassword()));
+		ur.save(u);
+		return u;
+	}
+
+	public String verify(Users u) {
+
+	    try {
+
+	        System.out.println("Login Attempt");
+	        System.out.println(u.getUsername());
+
+	        Authentication auth = authmanger.authenticate(
+	                new UsernamePasswordAuthenticationToken(
+	                        u.getUsername(),
+	                        u.getPassword()));
+
+	        System.out.println("Authenticated = " + auth.isAuthenticated());
+
+	        return jwt.generateToken(u.getUsername());
+
+	    } catch (Exception e) {
+
+	        e.printStackTrace();
+
+	        return e.getClass().getName() + " : " + e.getMessage();
+	    }
+	}
 }
