@@ -3,8 +3,11 @@ package com.example.demo.controller;
 
 import java.util.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import com.example.demo.dto.CodeforcesSubmission;
 import com.example.demo.dto.UserAnalysisReport;
 import com.example.demo.service.CodeforcesDataGatewayService;
 import com.example.demo.service.CodeforcesService;
@@ -38,6 +41,19 @@ public class CodeforcesUserController {
             return ResponseEntity.status(500).body(data);
         }
         
+        return ResponseEntity.ok(data);
+    }
+    @GetMapping("/cf/{handle}")
+    public ResponseEntity<?> getCodeforceDatafromgateway(@PathVariable String handle) {
+
+        List<CodeforcesSubmission> data = cds.getUserFullProfile(handle);
+
+        if (data == null || data.isEmpty()) {
+            return ResponseEntity
+                    .status(HttpStatusCode.valueOf(400))
+                    .body("Wrong username or user does not exist");
+        }
+
         return ResponseEntity.ok(data);
     }
     @GetMapping("/codeforces/{handle}/gettopics")
