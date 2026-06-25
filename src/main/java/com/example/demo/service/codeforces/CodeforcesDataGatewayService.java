@@ -1,4 +1,4 @@
-package com.example.demo.service;
+package com.example.demo.service.codeforces;
 
 import java.util.Collections;
 import java.util.List;
@@ -10,8 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import com.example.demo.dto.CodeforcesResponse;
-import com.example.demo.dto.CodeforcesSubmission;
+import com.example.demo.dto.codeforces.CodeforcesResponse;
+import com.example.demo.dto.codeforces.CodeforcesSubmission;
 
 @Service
 public class CodeforcesDataGatewayService {

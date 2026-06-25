@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.dto.UserAnalysisReport;
+import com.example.demo.dto.codeforces.UserAnalysisReport;
 import com.example.demo.service.BrevoApiService;
-import com.example.demo.service.CodeforcesService;
+import com.example.demo.service.codeforces.CodeforcesService;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;

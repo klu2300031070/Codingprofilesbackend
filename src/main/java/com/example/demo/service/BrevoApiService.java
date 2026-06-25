@@ -1,6 +1,5 @@
 package com.example.demo.service;
 
-import com.example.demo.dto.UserAnalysisReport;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
@@ -13,6 +12,8 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+
+import com.example.demo.dto.codeforces.UserAnalysisReport;
 
 @Service
 public class BrevoApiService {

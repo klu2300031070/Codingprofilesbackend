@@ -1,12 +1,12 @@
-package com.example.demo.service;
+package com.example.demo.service.codeforces;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.dto.CodeforcesSubmission;
-import com.example.demo.dto.CodeforcesSubmission.Problem;
-import com.example.demo.dto.TopicMetrics;
-import com.example.demo.dto.UserAnalysisReport;
+import com.example.demo.dto.codeforces.CodeforcesSubmission;
+import com.example.demo.dto.codeforces.TopicMetrics;
+import com.example.demo.dto.codeforces.UserAnalysisReport;
+import com.example.demo.dto.codeforces.CodeforcesSubmission.Problem;
 
 import java.util.*;
 

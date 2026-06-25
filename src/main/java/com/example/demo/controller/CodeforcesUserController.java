@@ -7,10 +7,11 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.demo.dto.CodeforcesSubmission;
-import com.example.demo.dto.UserAnalysisReport;
-import com.example.demo.service.CodeforcesDataGatewayService;
-import com.example.demo.service.CodeforcesService;
+import com.example.demo.dto.codeforces.CodeforcesSubmission;
+import com.example.demo.dto.codeforces.UserAnalysisReport;
+import com.example.demo.service.codeforces.CodeforcesDataGatewayService;
+import com.example.demo.service.codeforces.CodeforcesService;
+
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 
