@@ -6,7 +6,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.example.demo.dto.Users; // 🔥 FIX: Import your own entity, not Spring's User class
+import com.example.demo.model.Users;
 import com.example.demo.repo.UserRepo;
 
 @Service // 🔥 FIX: Added bean annotation so Spring finds it

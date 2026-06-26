@@ -5,11 +5,15 @@ import java.util.Collections;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import com.example.demo.dto.Users;
+
+import com.example.demo.model.Users;
 
 public class UserPrincipal implements UserDetails {
     
-    private final Users user; 
+    /**w
+	 * 
+	 */
+	private final Users user; 
 
     // 🔥 FIX: Changed from private to public so UserService can instantiate it
     public UserPrincipal(Users u) {
@@ -18,7 +22,7 @@ public class UserPrincipal implements UserDetails {
     
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singleton(new SimpleGrantedAuthority("USER"));
+    	return Collections.singleton(new SimpleGrantedAuthority("ROLE_"+user.getRole()));
     }
 
     @Override

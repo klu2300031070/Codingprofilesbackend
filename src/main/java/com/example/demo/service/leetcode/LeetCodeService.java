@@ -193,7 +193,6 @@ public class LeetCodeService {
     @Value("${gemini.api.key}")
     private String geminiApiKey;
 
-    // ... (Keep all your standard structural methods like getSkillStatistics, getProblemProgress, etc.) ...
 
     public LeetCodeAnalysisReport generateUserAiAnalysis(String username) {
         Map<String, Object> skillStats = getSkillStatistics(username);

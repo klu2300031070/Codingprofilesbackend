@@ -1,4 +1,4 @@
-package com.example.demo.dto;
+package com.example.demo.model;
 
 
 import jakarta.persistence.Column;
@@ -12,12 +12,32 @@ public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @Column
+    @Column(unique = true)
     private String username;
     @Column
     private String password;
+    @Column
+    private String role;
+    
+    private String email;
 
-    public int getId() {
+    public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getRole() {
+		return role;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
+	}
+
+	public int getId() {
         return id;
     }
 

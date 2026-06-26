@@ -11,9 +11,7 @@ import com.example.demo.dto.codeforces.UserAnalysisReport;
 import com.example.demo.service.BrevoApiService;
 import com.example.demo.service.codeforces.CodeforcesService;
 
-import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-import java.util.List;
+
 
 @RestController
 @RequestMapping("/email")

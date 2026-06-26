@@ -59,4 +59,24 @@ public class BrevoApiService {
             throw new RuntimeException("CRITICAL: Failed to construct or dispatch code analytics email report", e);
         }
     }
-}
+
+    public void sendOtpEmail(String toEmail, String otpCode) {
+        try {
+            jakarta.mail.internet.MimeMessage mimeMessage = mailSender.createMimeMessage();
+            org.springframework.mail.javamail.MimeMessageHelper helper = 
+                    new org.springframework.mail.javamail.MimeMessageHelper(mimeMessage, false, "UTF-8");
+            
+            helper.setTo(toEmail);
+            helper.setSubject("Your Login Verification Code");
+            helper.setFrom("rockykameshaissee808@gmail.com", "CodeAnatic Security");
+            
+            String textContent = "Hello,\n\nYour security verification code is: " + otpCode 
+                    + "\n\nThis code is valid for 5 minutes. If you did not request this code, please ignore this email.";
+            
+            helper.setText(textContent, false); // Using plain-text for security delivery
+            mailSender.send(mimeMessage);
+            System.out.println("OTP security email successfully dispatched to: " + toEmail);
+        } catch (Exception e) {
+            throw new RuntimeException("CRITICAL: Failed to dispatch verification OTP email", e);
+        }
+    }}
