@@ -15,8 +15,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.UserResponse;
+import com.example.demo.model.Codingprofiles;
 import com.example.demo.model.Users;
+import com.example.demo.repo.Codingprofilerepo;
 import com.example.demo.repo.UserRepo;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class UserService {
@@ -40,10 +44,69 @@ public class UserService {
 	
 	private BCryptPasswordEncoder encoder=new BCryptPasswordEncoder(12);
 	
-	public Users register(Users u) {
-		u.setPassword(encoder.encode( u.getPassword()));
-		ur.save(u);
-		return u;
+	private final Codingprofilerepo cr;
+	public UserService(Codingprofilerepo cr) {
+		this.cr=cr;
+	}
+	
+	
+	@Transactional
+	public UserResponse register(Users u) {
+
+	    try {
+	    	System.out.println("1. Username Check");
+	    	System.out.println(ur.findByUsername(u.getUsername()));
+
+	    	System.out.println("2. Email Check");
+	    	System.out.println(ur.findByEmail(u.getEmail()));
+
+	    	System.out.println("3. CF Username = " + u.getCodingProfile().getCfusername());
+	    	System.out.println("4. LC Username = " + u.getCodingProfile().getLcusername());
+
+	    	System.out.println("5. CF Exists = " + cr.findByCfusername(u.getCodingProfile().getCfusername()));
+	    	System.out.println("6. LC Exists = " + cr.findByLcusername(u.getCodingProfile().getLcusername()));
+
+	    	System.out.println("7. Saving...");
+	    	//Users savedUser = ur.save(u);
+	    	System.out.println("8. Saved");
+
+	        if (ur.findByUsername(u.getUsername()) != null) {
+	            throw new RuntimeException("Username already exists.");
+	        }
+
+	        if (ur.findByEmail(u.getEmail()) != null) {
+	            throw new RuntimeException("Email already exists.");
+	        }
+
+	        u.setPassword(encoder.encode(u.getPassword()));
+
+	        Codingprofiles profile = new Codingprofiles();
+	        String cf=u.getCodingProfile().getCfusername();
+	        String lc=u.getCodingProfile().getLcusername();
+	        profile.setCfusername(cf);
+	        profile.setLcusername(lc);
+
+	        profile.setUser(u);
+	        u.setCodingProfile(profile);
+	         if(cr.findByCfusername(cf)!=null) {
+		            throw new RuntimeException("Codeforces Username already exists.");
+	         }
+	         if(cr.findByLcusername(lc)!=null) {
+		            throw new RuntimeException("LeetCode Username already exists.");
+	         }
+
+	        Users savedUser = ur.save(u);
+
+	        return new UserResponse(
+	                savedUser.getId(),
+	                savedUser.getUsername(),
+	                savedUser.getRole()
+	        );
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        throw new RuntimeException(e.getMessage());
+	    }
 	}
 
 	public String verify(Users u) {
@@ -170,6 +233,6 @@ public class UserService {
 	}
 
 	public boolean userExists(Users user) {
-		return ur.findByUsername(user.getUsername())!=null;
+		return ur.findByUsername(user.getUsername())!=null&&ur.findByEmail(user.getEmail())!=null;
 	}
 }

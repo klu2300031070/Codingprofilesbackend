@@ -1,43 +1,39 @@
 package com.example.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 
 @Entity
 public class Users {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
     @Column(unique = true)
     private String username;
-    @Column
+
+    @Column(nullable = false)
     private String password;
-    @Column
+
+    @Column(nullable = false)
     private String role;
-    
+
+    @Column(unique = true, nullable = false)
     private String email;
 
-    public String getEmail() {
-		return email;
-	}
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private Codingprofiles codingProfile;
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	public String getRole() {
-		return role;
-	}
-
-	public void setRole(String role) {
-		this.role = role;
-	}
-
-	public int getId() {
+    public int getId() {
         return id;
     }
 
@@ -61,12 +57,27 @@ public class Users {
         this.password = password;
     }
 
-    @Override
-    public String toString() {
-        return "Users{" +
-                "id=" + id +
-                ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                '}';
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public Codingprofiles getCodingProfile() {
+        return codingProfile;
+    }
+
+    public void setCodingProfile(Codingprofiles codingProfile) {
+        this.codingProfile = codingProfile;
     }
 }

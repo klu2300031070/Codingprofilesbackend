@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dto.leetcode.LeetCodeAnalysisReport;
+import com.example.demo.repo.UserRepo;
 import com.example.demo.service.leetcode.LeetCodeService;
 
 import java.util.Map;
@@ -18,41 +20,56 @@ public class LeetCodeController {
 
     @Autowired
     private LeetCodeService leetCodeService;
+    
+    @Autowired
+    private UserRepo ur;
 
     // Existing core profile mapping
-    @GetMapping("/{username}")
-    public Map<String, Object> getLeetCodeProfile(@PathVariable String username) {
-        return leetCodeService.getUserProfile(username);
+    @GetMapping("/")
+    public Map<String, Object> getLeetCodeProfile() {
+    	String username=SecurityContextHolder.getContext().getAuthentication().getName();
+    	String lc=ur.findByUsername(username).getCodingProfile().getLcusername();
+        return leetCodeService.getUserProfile(lc);
     }
 
     // Language statistics mapping
-    @GetMapping("/{username}/languages")
-    public Map<String, Object> getLanguageStats(@PathVariable String username) {
-        return leetCodeService.getLanguageStatistics(username);
+    @GetMapping("/languages")
+    public Map<String, Object> getLanguageStats() {
+    	String username=SecurityContextHolder.getContext().getAuthentication().getName();
+    	String lc=ur.findByUsername(username).getCodingProfile().getLcusername();
+        return leetCodeService.getLanguageStatistics(lc);
     }
 
     // Skill/Tag statistics mapping
-    @GetMapping("/{username}/skills")
-    public Map<String, Object> getSkillStats(@PathVariable String username) {
-        return leetCodeService.getSkillStatistics(username);
+    @GetMapping("/skills")
+    public Map<String, Object> getSkillStats() {
+    	String username=SecurityContextHolder.getContext().getAuthentication().getName();
+    	String lc=ur.findByUsername(username).getCodingProfile().getLcusername();
+        return leetCodeService.getSkillStatistics(lc);
     }
 
     // Contest and ranking history mapping
-    @GetMapping("/{username}/contests")
-    public Map<String, Object> getContestStats(@PathVariable String username) {
-        return leetCodeService.getContestStatistics(username);
+    @GetMapping("/contests")
+    public Map<String, Object> getContestStats() {
+    	String username=SecurityContextHolder.getContext().getAuthentication().getName();
+    	String lc=ur.findByUsername(username).getCodingProfile().getLcusername();
+        return leetCodeService.getContestStatistics(lc);
     }
 
     // 1. Problem Progress By Difficulty Mapping
-    @GetMapping("/{username}/progress")
-    public Map<String, Object> getProblemProgress(@PathVariable String username) {
-        return leetCodeService.getProblemProgress(username);
+    @GetMapping("/progress")
+    public Map<String, Object> getProblemProgress() {
+    	String username=SecurityContextHolder.getContext().getAuthentication().getName();
+    	String lc=ur.findByUsername(username).getCodingProfile().getLcusername();
+        return leetCodeService.getProblemProgress(lc);
     }
 
     // 2. Overall Submission Statistics Mapping
-    @GetMapping("/{username}/submissions-stats")
-    public Map<String, Object> getOverallSubmissionStats(@PathVariable String username) {
-        return leetCodeService.getOverallSubmissionStats(username);
+    @GetMapping("/submissions-stats")
+    public Map<String, Object> getOverallSubmissionStats() {
+    	String username=SecurityContextHolder.getContext().getAuthentication().getName();
+    	String lc=ur.findByUsername(username).getCodingProfile().getLcusername();
+        return leetCodeService.getOverallSubmissionStats(lc);
     }
 
     // 3. User Submission Calendar Mapping

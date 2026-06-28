@@ -2,13 +2,17 @@ package com.example.demo.controller;
 
 
 import java.util.*;
+
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.dto.codeforces.CodeforcesSubmission;
 import com.example.demo.dto.codeforces.UserAnalysisReport;
+import com.example.demo.repo.UserRepo;
 import com.example.demo.service.codeforces.CodeforcesDataGatewayService;
 import com.example.demo.service.codeforces.CodeforcesService;
 
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 
 @RestController
+@RequestMapping("/codeforces")
 public class CodeforcesUserController {
 
     
@@ -27,44 +32,36 @@ public class CodeforcesUserController {
     
     @Autowired
     private CodeforcesDataGatewayService cds;
+    
+    @Autowired
+    private UserRepo ur;
   
+   
+    
+    
     @GetMapping("/")
-    public String getMethodName(HttpServletRequest hq) {
-        return "Project is working " +hq.getSession().getId();
-    }
-    
-    
-    @GetMapping("/codeforces/{handle}")
-    public ResponseEntity<Map<String, Object>> getCodeforceData(@PathVariable String handle) {
-    	
-    	Map<String, Object> data=cs.getUserFullProfile(handle);
+    public ResponseEntity<Map<String, Object>> getCodeforceData() {
+    	String username=SecurityContextHolder.getContext().getAuthentication().getName();
+    	String cf=ur.findByUsername(username).getCodingProfile().getCfusername();
+    	Map<String, Object> data=cs.getUserFullProfile(cf);
         if (data.containsKey("profile_error") && data.containsKey("submissions_error")) {
             return ResponseEntity.status(500).body(data);
         }
         
         return ResponseEntity.ok(data);
     }
-    @GetMapping("/cf/{handle}")
-    public ResponseEntity<?> getCodeforceDatafromgateway(@PathVariable String handle) {
-
-        List<CodeforcesSubmission> data = cds.getUserFullProfile(handle);
-
-        if (data == null || data.isEmpty()) {
-            return ResponseEntity
-                    .status(HttpStatusCode.valueOf(400))
-                    .body("Wrong username or user does not exist");
-        }
-
-        return ResponseEntity.ok(data);
-    }
-    @GetMapping("/codeforces/{handle}/gettopics")
-    public ResponseEntity<Map<String, Integer>> getMethodName(@PathVariable String handle ) {
-    	
+    
+    @GetMapping("/gettopics")
+    public ResponseEntity<Map<String, Integer>> getMethodName( ) {
+    	String username=SecurityContextHolder.getContext().getAuthentication().getName();
+    	String handle=ur.findByUsername(username).getCodingProfile().getCfusername();
         return ResponseEntity.ok(cs.calculateTopicPerformance(handle));
     }
     
-    @GetMapping("/codeforces/{handle}/score")
-    public UserAnalysisReport gettopicscores(@PathVariable String handle) {
+    @GetMapping("/score")
+    public UserAnalysisReport gettopicscores() {
+    	String username=SecurityContextHolder.getContext().getAuthentication().getName();
+    	String handle=ur.findByUsername(username).getCodingProfile().getCfusername();
         return cs.generateAdvancedAnalysis(handle);
     }
     
