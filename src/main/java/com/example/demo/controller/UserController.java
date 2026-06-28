@@ -30,7 +30,7 @@ public class UserController {
         return "Project is working " +hq.getSession().getId();
     } 
 
-    @PostMapping("/register")
+  /*  @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Users user) {
 
         try {
@@ -56,6 +56,34 @@ public class UserController {
                     .body("Something went wrong while registering user.");
 
         }
+    }*/
+ // Inside UserController class...
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody Users user) {
+        Map<String, Object> result = us.initiateRegistrationVerify(user);
+        
+        if ("ERROR".equals(result.get("status"))) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+        }
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/reg-otp")
+    public ResponseEntity<Map<String, Object>> verifyRegistrationOtp(@RequestBody Map<String, String> requestData) {
+        String username = requestData.get("username");
+        String otpCode = requestData.get("otpCode");
+
+        if (username == null || otpCode == null) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Missing username or otpCode fields."));
+        }
+
+        Map<String, Object> result = us.completeRegistrationOtpVerification(username, otpCode);
+
+        if (!"SUCCESS".equals(result.get("status"))) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+        }
+        return ResponseEntity.ok(result);
     }
 
    /* @PostMapping("/login")
@@ -73,7 +101,7 @@ public class UserController {
     }
 
     // Step 2: Validate the OTP token sent via mail delivery channels
-    @PostMapping("/verify-otp")
+    @PostMapping("/log-otp")
     public ResponseEntity<Map<String, Object>> verifyOtp(@RequestBody Map<String, String> requestData) {
         String username = requestData.get("username");
         String otpCode = requestData.get("otpCode");

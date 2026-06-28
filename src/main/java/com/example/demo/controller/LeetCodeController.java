@@ -73,13 +73,15 @@ public class LeetCodeController {
     }
 
     // 3. User Submission Calendar Mapping
-    @GetMapping("/{username}/calendar")
-    public Map<String, Object> getSubmissionCalendar(@PathVariable String username) {
-        return leetCodeService.getSubmissionCalendar(username);
+    @GetMapping("/calendar")
+    public Map<String, Object> getSubmissionCalendar() {
+    	String username=SecurityContextHolder.getContext().getAuthentication().getName();
+    	String lc=ur.findByUsername(username).getCodingProfile().getLcusername();
+        return leetCodeService.getSubmissionCalendar(lc);
     }
 
     // 4. Recent Accepted Submissions Mapping (Defaults limit to 20 if not provided)
-    @GetMapping("/{username}/recent-ac")
+    @GetMapping("/recent-ac")
     public Map<String, Object> getRecentAcSubmissions(
             @PathVariable String username,
             @RequestParam(defaultValue = "20") int limit) {
@@ -87,12 +89,16 @@ public class LeetCodeController {
     }
 
     // 5. Active User Badge Information Mapping
-    @GetMapping("/{username}/active-badge")
-    public Map<String, Object> getActiveBadge(@PathVariable String username) {
-        return leetCodeService.getActiveBadge(username);
+    @GetMapping("/active-badge")
+    public Map<String, Object> getActiveBadge() {
+    	String username=SecurityContextHolder.getContext().getAuthentication().getName();
+    	String lc=ur.findByUsername(username).getCodingProfile().getLcusername();
+        return leetCodeService.getActiveBadge(lc);
     }
-    @GetMapping("/{username}/ai-analysis")
-    public LeetCodeAnalysisReport getAiAnalysis(@PathVariable String username) {
-        return leetCodeService.generateUserAiAnalysis(username);
+    @GetMapping("/ai-analysis")
+    public LeetCodeAnalysisReport getAiAnalysis() {
+    	String username=SecurityContextHolder.getContext().getAuthentication().getName();
+    	String lc=ur.findByUsername(username).getCodingProfile().getLcusername();
+        return leetCodeService.generateUserAiAnalysis(lc);
     }
 }

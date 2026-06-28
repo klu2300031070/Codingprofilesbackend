@@ -34,7 +34,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
             	    .requestMatchers(HttpMethod.POST, "/register").permitAll()
             	    .requestMatchers(HttpMethod.POST, "/login").permitAll()
-            	    .requestMatchers(HttpMethod.POST, "/verify-otp").permitAll()
+            	    .requestMatchers(HttpMethod.POST, "/log-otp").permitAll()
+            	    .requestMatchers(HttpMethod.POST, "/reg-otp").permitAll()
             	    .requestMatchers("/users").hasRole("ADMIN")
             	    .anyRequest().authenticated()
             	)

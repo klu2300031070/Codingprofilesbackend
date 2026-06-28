@@ -19,6 +19,7 @@ import com.example.demo.model.Codingprofiles;
 import com.example.demo.model.Users;
 import com.example.demo.repo.Codingprofilerepo;
 import com.example.demo.repo.UserRepo;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.transaction.Transactional;
 
@@ -27,6 +28,8 @@ public class UserService {
 
 	@Autowired
 	private JwtService jwt;
+	@Autowired
+	private ObjectMapper objectMapper; // Injection to handle JSON strings in Redis
 	
 	@Autowired
 	public UserRepo ur;
@@ -235,4 +238,150 @@ public class UserService {
 	public boolean userExists(Users user) {
 		return ur.findByUsername(user.getUsername())!=null&&ur.findByEmail(user.getEmail())!=null;
 	}
+
+	// Inside UserService class...
+
+
+	private static final String REG_OTP_PREFIX = "REG_OTP:";
+	private static final String PENDING_USER_PREFIX = "PENDING_USER:";
+
+	public Map<String, Object> initiateRegistrationVerify(Users u) {
+	    Map<String, Object> response = new HashMap<>();
+	    try {
+	        // 1. Initial uniqueness assertions
+	        if (ur.findByUsername(u.getUsername()) != null) {
+	            throw new RuntimeException("Username already exists.");
+	        }
+	        if (ur.findByEmail(u.getEmail()) != null) {
+	            throw new RuntimeException("Email already exists.");
+	        }
+	        
+	        String cf = u.getCodingProfile() != null ? u.getCodingProfile().getCfusername() : null;
+	        String lc = u.getCodingProfile() != null ? u.getCodingProfile().getLcusername() : null;
+	        
+	        if (cf != null && cr.findByCfusername(cf) != null) {
+	            throw new RuntimeException("Codeforces Username already exists.");
+	        }
+	        if (lc != null && cr.findByLcusername(lc) != null) {
+	            throw new RuntimeException("LeetCode Username already exists.");
+	        }
+
+	        // 2. Generate the 6-digit registration OTP code
+	        String otpCode = String.format("%06d", new Random().nextInt(999999));
+
+	        // 3. Stash the OTP token in Redis for 5 minutes
+	        redisTemplate.opsForValue().set(
+	                REG_OTP_PREFIX + u.getUsername(), 
+	                otpCode, 
+	                Duration.ofMinutes(5)
+	        );
+
+	        // 4. Serialize and stash the complete user request payload into Redis for 5 minutes
+	        String userJson = objectMapper.writeValueAsString(u);
+	        redisTemplate.opsForValue().set(
+	                PENDING_USER_PREFIX + u.getUsername(),
+	                userJson,
+	                Duration.ofMinutes(5)
+	        );
+
+	        // 5. Fire off the email dispatch
+	        emailService.sendOtpEmail(u.getEmail(), otpCode);
+	        System.out.println("OTP = " +otpCode);
+	        System.out.println("User JSON = " + userJson);
+	        response.put("status", "REG_OTP_SENT");
+	        response.put("message", "Registration verification code sent to email. Valid for 5 mins.");
+	        return response;
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        response.put("status", "ERROR");
+	        response.put("message", e.getMessage());
+	        return response;
+	    }
+	}
+
+	@Transactional
+	public Map<String, Object> completeRegistrationOtpVerification(String username, String userCode) {
+	    Map<String, Object> response = new HashMap<>();
+	    System.out.println("Username      : " + username);
+	    System.out.println("OTP From User : " + userCode);
+
+	    String otpKey = REG_OTP_PREFIX + username;
+	    String userKey = PENDING_USER_PREFIX + username;
+
+	    System.out.println("OTP Key       : " + otpKey);
+	    System.out.println("User Key      : " + userKey);
+
+	    String savedOtp = redisTemplate.opsForValue().get(otpKey);
+	    String pendingUserJson = redisTemplate.opsForValue().get(userKey);
+
+	    System.out.println("OTP In Redis  : " + savedOtp);
+	    System.out.println("User In Redis : " + pendingUserJson);
+
+	    if (savedOtp == null || pendingUserJson == null) {
+	        response.put("status", "EXPIRED");
+	        response.put("message", "The verification code has expired or registration session timed out.");
+	        return response;
+	    }
+
+	    if (!savedOtp.equals(userCode)) {
+	        response.put("status", "INVALID");
+	        response.put("message", "Incorrect verification code. Please check your email inbox.");
+	        return response;
+	    }
+
+	    try {
+	        // Parse the user object back from the cache state
+	       // Users u = objectMapper.readValue(pendingUserJson, Users.class);
+	        Users u = objectMapper.readValue(pendingUserJson, Users.class);
+
+	        System.out.println("Username = " + u.getUsername());
+	        System.out.println("Email = " + u.getEmail());
+	        System.out.println("Role = " + u.getRole());
+	        System.out.println("Coding Profile = " + u.getCodingProfile());
+
+	        // Double check uniqueness just in case someone registered while OTP was active
+	        if (ur.findByUsername(u.getUsername()) != null || ur.findByEmail(u.getEmail()) != null) {
+	            throw new RuntimeException("Username or Email was taken during the verification window.");
+	        }
+
+	        // Secure password hash operations prior to DB injection
+	        u.setPassword(encoder.encode(u.getPassword()));
+
+	        // Establish structural bi-directional mapping
+	        if (u.getCodingProfile() != null) {
+	            Codingprofiles profile = new Codingprofiles();
+	            profile.setCfusername(u.getCodingProfile().getCfusername());
+	            profile.setLcusername(u.getCodingProfile().getLcusername());
+	            profile.setUser(u);
+	            u.setCodingProfile(profile);
+	        }
+	        
+
+	        // Commit official persistent state record to DB
+	        Users savedUser = ur.save(u);
+
+	        // Purge values out of cache to prevent replay exploitation
+	        redisTemplate.delete(otpKey);
+	        redisTemplate.delete(userKey);
+
+	        UserResponse userResponse = new UserResponse(
+	                savedUser.getId(),
+	                savedUser.getUsername(),
+	                savedUser.getRole()
+	        );
+
+	        response.put("status", "SUCCESS");
+	        response.put("message", "Account successfully verified and created.");
+	        response.put("user", userResponse);
+	        return response;
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        response.put("status", "ERROR");
+	        response.put("message", e.getMessage());
+	        return response;
+	    }
+	}
+	
 }
